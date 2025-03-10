@@ -1,0 +1,66 @@
+class Solution {
+    public int findKthPositive(int[] arr, int k) {
+        
+        /*
+        ✅ Problem Statement:
+           Given a sorted array of distinct positive integers 'arr' and an integer 'k',
+           we need to find the k-th missing positive number.
+        
+        ✅ Approach: Binary Search on Missing Count
+           1️⃣ Define the search space with `low = 0` and `high = arr.length - 1`.
+           2️⃣ Use binary search to determine the position where k-th missing number lies.
+           3️⃣ Use `missingCount = arr[mid] - (mid + 1)` to track how many numbers are missing before `mid`.
+           4️⃣ Adjust `low` and `high` based on `missingCount`:
+               - If `missingCount < k`, search in the right half (`low = mid + 1`).
+               - Else, search in the left half (`high = mid - 1`).
+           5️⃣ The final result is `low + k`, as `low` indicates the position where the k-th missing number would be.
+
+        ✅ Time Complexity: **O(log N)** due to Binary Search
+        ✅ Space Complexity: **O(1)** (No extra space used)
+        */
+
+        int low = 0, high = arr.length - 1;
+
+        //  Perform Binary Search
+        while (low <= high) {
+            int mid = (low + high) / 2;
+
+            //  Calculate missing numbers before index 'mid'
+            int missingCount = arr[mid] - (mid + 1);
+
+            if (missingCount < k) {
+                //  If missing numbers are less than k, move right
+                low = mid + 1;
+            } else {
+                //  If we have enough missing numbers, move left
+                high = mid - 1;
+            }
+        }
+
+        // 🔹 The k-th missing number is found at `low + k`
+        return low + k;
+    }
+}
+
+/*
+📌 Why These Assumptions?
+
+1️⃣ **Why `low = 0` and `high = arr.length - 1`?**
+   - The array is sorted, and we are searching within the index range.
+   - `low` represents where the k-th missing number would fit in the sorted sequence.
+
+2️⃣ **Why `missingCount = arr[mid] - (mid + 1)`?**
+   - Normally, `arr[i]` should be `i + 1` if no numbers were missing.
+   - The difference `arr[mid] - (mid + 1)` tells us how many numbers are missing before `mid`.
+
+3️⃣ **Why `low = mid + 1` when `missingCount < k`?**
+   - If fewer numbers are missing than `k`, we must search **right**.
+
+4️⃣ **Why `high = mid - 1` when `missingCount >= k`?**
+   - If too many numbers are missing, we search **left** for a smaller valid answer.
+
+5️⃣ **Why is the answer `low + k`?**
+   - At the end of the binary search, `low` represents the number of existing elements before our answer.
+   - Thus, the k-th missing number is at `low + k` in a full sequence.
+
+*/
