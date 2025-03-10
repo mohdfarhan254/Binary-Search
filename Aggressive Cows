@@ -1,0 +1,71 @@
+class Solution {
+    public int maxDistance(int[] stalls, int k) {
+        /*
+        ✅ Problem Statement:
+           Given an array of stall positions and `k` cows, find the largest minimum 
+           distance possible between any two cows when placed optimally.
+        
+        ✅ Why is the Smallest Possible Distance 0?
+           - The smallest possible distance between any two cows is `0` if all cows 
+             are placed in the same stall (which isn't allowed in this problem).
+           - The actual minimum valid distance should be at least `1`, so we start
+             our binary search from `low = 1` instead of `0`.
+
+        ✅ Why is the Largest Possible Distance max(stalls) - min(stalls)?
+           - The maximum possible distance occurs when we place the first cow in 
+             the first stall and the last cow in the last stall.
+           - This ensures the largest separation possible between any two cows.
+           - So, `max(stalls) - min(stalls)` gives the longest possible separation 
+             between the cows.
+
+        ✅ Approach: Binary Search on Answer
+           1️⃣ Sort the stall positions (since they are given in arbitrary order).
+           2️⃣ Perform a binary search on the possible minimum distances between cows.
+           3️⃣ Use a helper function `possible()` to check if we can place all `k` cows
+              with at least `mid` distance apart.
+           4️⃣ If possible, try for a larger distance (`low = mid + 1`).
+           5️⃣ If not possible, reduce the distance (`high = mid - 1`).
+        */
+        
+        Arrays.sort(stalls); // Sorting is necessary for placing cows optimally
+        int min = stalls[0];
+        int max = stalls[stalls.length - 1];
+        int low = 1; // Smallest possible distance is at least 1
+        int high = max - min; // Largest possible distance
+
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            
+            if (possible(mid, k, stalls)) {
+                low = mid + 1; // Try to maximize the minimum distance
+            } else {
+                high = mid - 1; // Reduce distance if not possible
+            }
+        }
+        return high; // The largest minimum distance found
+    }
+
+    static boolean possible(int minDist, int k, int[] stalls) {
+        /*
+           Why `>= minDist` and Not `< minDist`?
+           - `stalls[i] - prevStall` gives the distance between the last placed cow 
+             and the current stall.
+           - If this distance is **at least `minDist` (>= minDist)**, we can safely
+             place a cow in the current stall.
+           - We update `prevStall` to reflect the position of this newly placed cow.
+           - If we used `< minDist`, it would place cows too close, violating the
+             required condition of maximizing the minimum distance.
+        */
+        
+        int count = 1; // Place first cow in the first stall
+        int prevStall = stalls[0]; // Track last placed cow position
+        
+        for (int i = 1; i < stalls.length; i++) {
+            if (stalls[i] - prevStall >= minDist) {  
+                count++;  // Place a cow in this stall
+                prevStall = stalls[i]; // Update last placed cow
+            }
+        }
+        return count >= k; // If we placed all k cows, return true
+    }
+}
