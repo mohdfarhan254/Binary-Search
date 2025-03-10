@@ -1,0 +1,87 @@
+import java.util.ArrayList;
+
+public class Solution {
+    public static int findPages(ArrayList<Integer> arr, int n, int m) {
+        /*
+        ✅ Problem Statement:
+           Given an array where each element represents the number of pages in a book,
+           allocate books to 'm' students such that the **maximum pages assigned to any student is minimized**.
+
+        ✅ Approach: Binary Search on Answer
+           - We use binary search to find the minimum possible **maximum pages** a student can get.
+
+        ✅ Explanation of Search Space:
+           - `low = max(arr)`: The minimum possible allocation must be at least the book with the highest pages.
+           - `high = sum(arr)`: The maximum possible allocation occurs when one student gets all books.
+           - We perform **binary search** between `low` and `high` to find the minimum valid max pages.
+
+        ✅ Binary Search Steps:
+           1️⃣ Set `low = max(arr)`, `high = sum(arr)`.
+           2️⃣ Perform binary search on `mid = (low + high) / 2`.
+           3️⃣ Check if allocation is possible using `possible()`:
+               - If **possible**, try to minimize pages (`high = mid - 1`).
+               - If **not possible**, increase limit (`low = mid + 1`).
+           4️⃣ Return `low`, which gives the minimum maximum pages.
+
+        ✅ Time Complexity: **O(N log (sum - max))**, where N = number of books
+        ✅ Space Complexity: **O(1)** (No extra space used)
+        */
+
+        if (m > n) // If more students than books, allocation is not possible
+            return -1;
+        
+        int max = Integer.MIN_VALUE;
+        int sum = 0;
+
+        // Calculate max book pages & sum of all book pages
+        for (int i = 0; i < arr.size(); i++) {
+            max = Math.max(max, arr.get(i));
+            sum += arr.get(i);
+        }
+
+        int low = max;  // Minimum valid pages allocation
+        int high = sum; // Maximum valid pages allocation
+
+        // Binary Search for Minimum Maximum Pages Allocation
+        while (low <= high) {
+            int mid = (low + high) / 2;
+
+            if (possible(arr, n, m, mid)) {
+                high = mid - 1; // Try to minimize the maximum pages
+            } else {
+                low = mid + 1; // Increase the allowed page limit
+            }
+        }
+
+        return low; // Minimum possible max pages
+    }
+
+    static boolean possible(ArrayList<Integer> arr, int n, int m, int mid) {
+        /*
+        ✅ Function to check if books can be allocated with max `mid` pages per student.
+        ✅ Greedy Approach:
+           - Start allocating books to students one by one.
+           - If adding a book exceeds `mid`, allocate it to the next student.
+           - Keep track of student count and ensure it doesn't exceed `m`.
+        */
+
+        int stu = 1;  // Start with the first student
+        int page = 0; // Pages allocated to current student
+
+        for (int i = 0; i < arr.size(); i++) {
+            if (arr.get(i) + page <= mid) {
+                // Add book to the current student if within allowed `mid` pages
+                page += arr.get(i);
+            } else {
+                // Assign book to the next student
+                stu++;
+                page = arr.get(i); // Start new allocation
+
+                // If students exceed allowed limit, return false
+                if (stu > m) return false;
+            }
+        }
+
+        return true; // Allocation possible within `mid` pages
+    }
+}
