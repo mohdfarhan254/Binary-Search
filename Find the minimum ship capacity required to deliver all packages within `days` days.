@@ -1,0 +1,67 @@
+class Solution {
+    /**
+     * 📌 Problem: Find the minimum ship capacity required to deliver all packages within `days` days.
+     * 
+     * 🔹 Approach: **Binary Search on Capacity**
+     * - The **minimum capacity** must be at least the weight of the heaviest package (`max(weights)`).
+     * - The **maximum capacity** is the total sum of all package weights (`sum(weights)`), meaning one trip delivers all.
+     * - We use **Binary Search** to efficiently determine the smallest valid ship capacity.
+     * 
+     * 🔍 Binary Search Steps:
+     * 1️⃣ Define the search range: `left = max(weights)`, `right = sum(weights)`.
+     * 2️⃣ Pick a mid-capacity (`mid = (left + right) / 2`).
+     * 3️⃣ Check if this capacity allows shipping within `days`.
+     * 4️⃣ If possible, try a smaller capacity (`right = mid - 1`).
+     * 5️⃣ If not possible, increase capacity (`left = mid + 1`).
+     * 6️⃣ The final answer is stored in `left` after the loop.
+     */
+    public int shipWithinDays(int[] weights, int days) {
+        
+        // Step 1: Find the min and max capacity limits
+        int totalWeight = 0;
+        int heaviestPackage = Integer.MIN_VALUE;
+        
+        for (int weight : weights) {
+            heaviestPackage = Math.max(heaviestPackage, weight);
+            totalWeight += weight;
+        }
+
+        // Step 2: Binary search on ship capacity range
+        int left = heaviestPackage; // Minimum possible ship capacity
+        int right = totalWeight;    // Maximum possible ship capacity
+
+        while (left <= right) {
+            int capacity = (left + right) / 2;
+
+            if (canShip(weights, capacity, days)) {
+                right = capacity - 1; // Try reducing capacity
+            } else {
+                left = capacity + 1;  // Increase capacity
+            }
+        }
+
+        return left; // The smallest valid ship capacity
+    }
+
+    /**
+     * 📌 Helper function to check if a given capacity can ship all packages within `days` days.
+     * 
+     * - We keep adding package weights until we exceed `capacity`, then start a new day.
+     * - If the total days required is within `days`, the capacity is valid.
+     */
+    private boolean canShip(int[] weights, int capacity, int days) {
+        int currentLoad = 0;
+        int requiredDays = 1; // Start from the first day
+
+        for (int weight : weights) {
+            if (currentLoad + weight > capacity) {
+                requiredDays++; // Start a new day
+                currentLoad = weight; // Load first package of the new day
+            } else {
+                currentLoad += weight; // Continue loading the same day
+            }
+        }
+
+        return requiredDays <= days; // True if we can ship within given days
+    }
+}
